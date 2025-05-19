@@ -1,107 +1,131 @@
 # EXP.NO.8-Simulation-of-QPSK
 
+8.Simulation of QPSK
 
 # AIM
 
-To simulate Quadrature Phase Shift Keying (QPSK) modulation using Python and visualize its in-phase, quadrature, and resultant waveforms.
+To simulate and visualize the Quadrature Phase Shift Keying (QPSK) signal using Python.
 
 # SOFTWARE REQUIRED
 
-Google Colab or Jupyter Notebook
+Python (version 3.6 or above)
 
-Python 3.x
-
-Required Libraries: numpy, matplotlib
+NumPy – for numerical operations and signal processing
 
 # ALGORITHMS
 
-1. Import required libraries.
+Generate Random Bit Sequence:
 
-2. Define simulation parameters (symbol period, sampling frequency, etc.).
+Generate a sequence of random binary bits.
 
-3. Generate a random bit sequence.
+Each QPSK symbol requires 2 bits.
 
-4. Map bits into QPSK symbols (2 bits per symbol).
+Map Bits to QPSK Symbols:
 
-5. Assign each symbol a phase from the QPSK constellation.
+Combine every two bits into one QPSK symbol.
 
-6. Generate QPSK-modulated waveform using cosine and sine for I/Q components.
+Use the mapping:
 
-7. Plot:-In-phase component-Quadrature component-Resultant waveform.
+00 → 0 radians
 
+01 → π/2 radians
+
+10 → π radians
+
+11 → 3π/2 radians
+
+Generate QPSK Waveform:
+
+For each symbol:
+
+Compute the waveform using:
+
+cos(2πft+ϕ) for the in-phase (real) part
+
+sin(2πft+ϕ) for the quadrature (imaginary) part
+
+Combine both to form a complex baseband signal.
+
+Append to the full signal array.
+
+Plot the Signal:
+
+In-phase component vs. time
+
+Quadrature component vs. time
+
+Real part of the full QPSK waveform
+
+Annotate symbol positions with corresponding binary values.
 
 # PROGRAM
-
-Import necessary libraries
 
 import numpy as np
 
 import matplotlib.pyplot as plt
 
-Parameters
-num_symbols = 10
+num_symbols = 10  
 
-T = 1.0
+T = 1.0  
 
-fs = 100.0
+fs = 100.0  
 
 t = np.arange(0, T, 1/fs)
 
-Number of QPSK symbols
-Symbol period (seconds)
-Sampling frequency (Hz)
-Time vector for one symbol
-Generate random bit sequence
-bits = np.random.randint(0, 2, num_symbols * 2) # Two bits per symbol
 
-symbols = 2 * bits[0::2] + bits[1::2]
+bits = np.random.randint(0, 2, num_symbols * 2)
 
-Initialize QPSK signal
-qpsk_signal = np.array([])
+i_bits = bits[0::2]  # Even-indexed bits
+
+q_bits = bits[1::2]  # Odd-indexed bits
+
+
+i_values = 2 * i_bits - 1
+
+q_values = 2 * q_bits - 1
+
+
+i_signal = np.array([])
+
+q_signal = np.array([])
+
+combined_signal = np.array([])
 
 symbol_times = []
 
-Define phase mapping for QPSK (Gray Coding)
-symbol_phases = {
+for i in range(num_symbols):
 
-0: 0,
+    i_carrier = i_values[i] * np.cos(2 * np.pi * t / T)
 
-1: np.pi / 2,
+    q_carrier = q_values[i] * np.sin(2 * np.pi * t / T)
 
-2: np.pi,
+    symbol_times.append(i * T)
 
-3: 3 * np.pi / 2 }
+    i_signal = np.concatenate((i_signal, i_carrier))
 
-Map bits to symbol (0 to 3)
-Generate the QPSK modulated signal
-for i, symbol in enumerate(symbols):
+    q_signal = np.concatenate((q_signal, q_carrier))
 
-phase = symbol_phases[symbol]
+    combined_signal = np.concatenate((combined_signal, i_carrier + q_carrier))
 
-symbol_time = i * T
-
-qpsk_segment = np.cos(2 * np.pi * t / T + phase) + 1j * np.sin(2 * np.pi * qpsk_signal = np.concatenate((qpsk_signal, qpsk_segment))
-
-symbol_times.append(symbol_time)
-
-Full time vector
 t_total = np.arange(0, num_symbols * T, 1/fs)
 
-Plotting the QPSK signal
-plt.figure(figsize=(14, 12))
 
-In-phase component
+
+plt.figure(figsize=(14, 9))
+
+
+
 plt.subplot(3, 1, 1)
 
-plt.plot(t_total, np.real(qpsk_signal), label='In-phase (I)', color='blue')
+plt.plot(t_total, i_signal, label='In-phase (cos)', color='blue')
 
 for i, symbol_time in enumerate(symbol_times):
 
-plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
+    plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
 
-plt.text(symbol_time + T/4, 0, f'{symbols[i]:02b}', fontsize=12, color='bla
+    plt.text(symbol_time + T/4, 0.8, f'{i_bits[i]}', fontsize=12, color='black')
 
-plt.title('QPSK - In-phase Component')
+plt.title('In-phase Component (Cosine) - One Bit per Symbol')
 
 plt.xlabel('Time')
 
@@ -111,18 +135,17 @@ plt.grid(True)
 
 plt.legend()
 
-Quadrature component
 plt.subplot(3, 1, 2)
 
-plt.plot(t_total, np.imag(qpsk_signal), label='Quadrature (Q)', color='orange')
+plt.plot(t_total, q_signal, label='Quadrature (sin)', color='orange')
 
 for i, symbol_time in enumerate(symbol_times):
 
-plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
+    plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
 
-plt.text(symbol_time + T/4, 0, f'{symbols[i]:02b}', fontsize=12, color='bla
+    plt.text(symbol_time + T/4, 0.8, f'{q_bits[i]}', fontsize=12, color='black')
 
-plt.title('QPSK - Quadrature Component')
+plt.title('Quadrature Component (Sine) - One Bit per Symbol')
 
 plt.xlabel('Time')
 
@@ -132,16 +155,18 @@ plt.grid(True)
 
 plt.legend()
 
-Resultant QPSK waveform
+
 plt.subplot(3, 1, 3)
 
-plt.plot(t_total, np.real(qpsk_signal), label='Resultant QPSK Waveform', color= for i, symbol_time in enumerate(symbol_times):
+plt.plot(t_total, combined_signal, label='QPSK Signal = I + Q', color='green')
 
-plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
+for i, symbol_time in enumerate(symbol_times):
 
-plt.text(symbol_time + T/4, 0, f'{symbols[i]:02b}', fontsize=12, color='bla
+    plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
 
-plt.title('Resultant QPSK Waveform (Real Part)')
+    plt.text(symbol_time + T/4, 0.8, f'{i_bits[i]}{q_bits[i]}', fontsize=12, color='black')
+
+plt.title('Combined QPSK Waveform')
 
 plt.xlabel('Time')
 
@@ -155,9 +180,12 @@ plt.tight_layout()
 
 plt.show()
 
+
 # OUTPUT
+![image](https://github.com/user-attachments/assets/29717c5c-573b-4bac-bb34-e4683681dba7)
 
-![image](https://github.com/user-attachments/assets/d304bda3-ae6c-4a5a-ad76-2fb7b54f4682)
 
- 
+
 # RESULT / CONCLUSIONS
+
+The QPSK (Quadrature Phase Shift Keying) signal was successfully generated using python.
