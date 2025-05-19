@@ -1,4 +1,4 @@
-# EXP.NO.8-Simulation-of-QPSK
+# EXP.NO.8-Simulation-of-QPSK.
 
 8.Simulation of QPSK
 
